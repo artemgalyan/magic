@@ -1,0 +1,17 @@
+[project]
+name = 'src'
+version = '0.1.0'
+authors = [
+    {name = 'Artsiom Halian', email = 'galyanartyom@gmail.com'}
+]
+description = 'Repository for learning DS'
+requires-python = '>=3.11.7'
+
+[tool.setuptools.packages.find]
+include=['src', 'src.*']
+
+[project.scripts]
+build-features = 'src.features.build_features:main'
+
+[tool.setuptools]
+include-package-data = true
