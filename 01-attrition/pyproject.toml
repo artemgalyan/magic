@@ -12,6 +12,7 @@ include=['src', 'src.*']
 
 [project.scripts]
 build-features = 'src.features.build_features:main'
+make-dataset = 'src.dataset.make_dataset:main'
 
 [tool.setuptools]
 include-package-data = true
