@@ -101,10 +101,12 @@ def main(raw_data_dir: str, output_path: str, statistics: list[str],
     log('Data is loaded. Preprocessing the data')
     in_times = preprocess_time_dataframe(in_times)
     out_times = preprocess_time_dataframe(out_times)
+    general_data.set_index(id_column, inplace=True)
+    manager_survey_data.set_index(id_column, inplace=True)
+    employee_survey_data.set_index(id_column, inplace=True)
     data = general_data \
         .join(manager_survey_data, on=id_column, how='left', lsuffix='', rsuffix='_r') \
-        .join(employee_survey_data, on=id_column, how='left', lsuffix='', rsuffix='_r') \
-        .drop(columns=[id_column + '_r'])
+        .join(employee_survey_data, on=id_column, how='left', lsuffix='', rsuffix='_r')
     data = preprocess_categorical_features(data)
     log('Adding features')
     for statistic in get_working_time_statistics(in_times, out_times, id_column, statistics):
