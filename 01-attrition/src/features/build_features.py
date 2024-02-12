@@ -83,8 +83,8 @@ def validate_file(raw_data_dir: Path, filename: str) -> None:
 @click.option('--out-times', '-ot', type=click.STRING, default='out_time.csv')
 @click.option('--id-column', '-id', type=click.STRING, default='EmployeeID')
 def main(raw_data_dir: str, output_path: str, statistics: list[str],
-                general_data: str, empl_surv_data: str,
-                mngr_surv_data: str, in_times: str, out_times: str, id_column: str) -> None:
+         general_data: str, empl_surv_data: str,
+         mngr_surv_data: str, in_times: str, out_times: str, id_column: str) -> None:
     raw_data_dir = Path(raw_data_dir)
     output_path = Path(output_path)
     for file in [general_data, empl_surv_data, mngr_surv_data, in_times, out_times]:
@@ -111,5 +111,6 @@ def main(raw_data_dir: str, output_path: str, statistics: list[str],
     log('Adding features')
     for statistic in get_working_time_statistics(in_times, out_times, id_column, statistics):
         data = data.join(statistic, on=id_column, how='left')
+    data = data.drop(columns=['Over18', 'EmployeeCount', 'StandardHours'])
     log('Saving the data')
     data.to_csv(output_path)
