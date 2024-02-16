@@ -2,7 +2,7 @@ import os
 import pickle
 
 from collections.abc import Generator, Iterable
-from typing import TypeVar
+from typing import TypeVar, ContextManager
 
 import shap
 import streamlit as st
@@ -19,6 +19,7 @@ st.set_page_config(layout='wide')
 
 
 T = TypeVar('T')
+
 
 def infinite_loop(iterable: Iterable[T]) -> Generator[T, None, None]:
     while True:
@@ -41,7 +42,7 @@ def get_unique_values(df: DataFrame, column: str) -> list[str]:
     return list(df[column].unique())
 
 
-def read_column(df: DataFrame, column: str, col) -> str | float:
+def read_column(df: DataFrame, column: str, col: ContextManager) -> str | float:
     assert column in df.columns
     with col:
         if df[column].dtype == 'object':
