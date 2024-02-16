@@ -12,10 +12,10 @@ from streamlit_shap import st_shap
 DATA_PATH = os.environ.get('DATA_PATH', 'data/interim/data.csv')
 MODEL_PATH = os.environ.get('DATA_PATH', 'models/CatBoostClassifier.pkl')
 
-st.set_page_config(page_title='Make prediction')
+st.set_page_config(layout='wide')
 
 
-@st.cache_resource
+@st.cache_data
 def load_data() -> DataFrame:
     return read_csv(DATA_PATH, index_col='EmployeeID')
 
@@ -60,7 +60,7 @@ def on_predict_clicked(user_input: dict[str, str | float], model: BaseEstimator,
     shap_values = explainer(model[:-1].transform(x))
     shap_values.feature_names = x.columns
     st.subheader('Explanation with SHAP')
-    st_shap(shap.plots.beeswarm(shap_values, max_display=len(user_input.keys())))
+    st_shap(shap.plots.waterfall(shap_values[0], max_display=len(x.keys())))
 
 
 data = load_data()
