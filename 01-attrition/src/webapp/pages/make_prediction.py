@@ -1,6 +1,9 @@
 import os
 import pickle
 
+from collections.abc import Generator, Iterable
+from typing import TypeVar
+
 import shap
 import streamlit as st
 
@@ -13,6 +16,13 @@ DATA_PATH = os.environ.get('DATA_PATH', 'data/interim/data.csv')
 MODEL_PATH = os.environ.get('DATA_PATH', 'models/CatBoostClassifier.pkl')
 
 st.set_page_config(layout='wide')
+
+
+T = TypeVar('T')
+
+def infinite_loop(iterable: Iterable[T]) -> Generator[T, None, None]:
+    while True:
+        yield from iterable
 
 
 @st.cache_data
@@ -31,11 +41,13 @@ def get_unique_values(df: DataFrame, column: str) -> list[str]:
     return list(df[column].unique())
 
 
-def read_column(df: DataFrame, column: str) -> str | float:
+def read_column(df: DataFrame, column: str, col) -> str | float:
     assert column in df.columns
-    if df[column].dtype == 'object':
-        return st.radio(label=column, options=get_unique_values(df, column))
-    return st.number_input(label=column)
+    with col:
+        if df[column].dtype == 'object':
+            return st.radio(label=column, options=get_unique_values(df, column))
+        granularity = 0.01 if str(df[column].dtype).startswith('float') else 1
+        return st.number_input(label=column, step=granularity)
 
 
 def get_predict_color(value: float) -> str:
@@ -68,7 +80,10 @@ st.header('Make prediction')
 st.markdown('Here you can make predictions on given instance. Categorical values can be selected only'
             'from ones that are present in the dataset')
 
-user_input = {column: [read_column(data, column)] for column in data.columns if column != 'Attrition'}
+columns = st.columns(2)
+user_input = {column_name: [read_column(data, column_name, col)]
+              for column_name, col in zip(data.columns, infinite_loop(columns))
+              if column_name != 'Attrition'}
 explain_model = st.checkbox('Explain prediction', value=True)
 
 if st.button('Make prediction'):
