@@ -1,10 +1,17 @@
+import os
+
+from pathlib import Path
+
 import streamlit as st
 
 from st_pages import add_page_title, show_pages, Page, add_indentation
 
 
+PREFIX_PATH = Path(os.environ.get('PREFIX_PATH', 'src/webapp/'))
+
+
 def path(filename: str) -> str:
-    return 'src/webapp/' + filename
+    return str(PREFIX_PATH / filename)
 
 
 add_page_title()
