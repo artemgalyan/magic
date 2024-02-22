@@ -73,7 +73,7 @@ def make_prediction(df: DataFrame, explain: bool) -> None:
     instance = [list(prepared_data_copy.iloc[instance_idx])]
     explanation = explainer(model[:-1].transform(instance))
     explanation.feature_names = prepared_data_copy.columns
-    st_shap(shap.plots.waterfall(explanation[0], max_display=len(prepared_data_copy.columns)))
+    st_shap(shap.plots.waterfall(explanation[0], max_display=len(prepared_data_copy.columns)), width=1600)
 
 
 def show_dataframe(file: DataFrame) -> None:
