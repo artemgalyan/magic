@@ -1,0 +1,12 @@
+extend-exclude=[
+    '*.sh',
+    '*.bat',
+    '*.md',
+]
+
+indent-width=4
+target-version='py311'
+
+[format]
+quote-style='single'
+indent-style='tab'
