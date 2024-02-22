@@ -2,6 +2,7 @@ import os
 import pickle
 
 from collections.abc import Generator, Iterable
+from itertools import cycle
 from typing import TypeVar, ContextManager
 
 import shap
@@ -19,11 +20,6 @@ st.set_page_config(layout='wide')
 
 
 T = TypeVar('T')
-
-
-def infinite_loop(iterable: Iterable[T]) -> Generator[T, None, None]:
-    while True:
-        yield from iterable
 
 
 @st.cache_data
@@ -83,7 +79,7 @@ st.markdown('Here you can make predictions on given instance. Categorical values
 
 columns = st.columns(2)
 user_input = {column_name: [read_column(data, column_name, col)]
-              for column_name, col in zip(data.columns, infinite_loop(columns))
+              for column_name, col in zip(data.columns, cycle(columns))
               if column_name != 'Attrition'}
 explain_model = st.checkbox('Explain prediction', value=True)
 
