@@ -6,7 +6,7 @@ import numpy as np
 import shap
 import streamlit as st
 from pandas import DataFrame, read_csv, Series
-from sklearn.base import BaseEstimator
+from sklearn.pipeline import Pipeline
 from st_aggrid import AgGrid, AgGridReturn, GridOptionsBuilder
 from streamlit_shap import st_shap
 
@@ -35,7 +35,7 @@ def is_button_pressed() -> bool:
 
 
 @st.cache_resource
-def load_model() -> BaseEstimator:
+def load_model() -> Pipeline:
     with open(MODEL_PATH, 'rb') as file:
         return pickle.load(file)
 
@@ -52,7 +52,7 @@ def drop_if_exist(df: DataFrame, *columns: str) -> DataFrame:
     return df
 
 
-def get_shap_values(prepared_data_copy: DataFrame, _model: BaseEstimator) -> shap.Explanation:
+def get_shap_values(prepared_data_copy: DataFrame, _model: Pipeline) -> shap.Explanation:
     explainer = shap.TreeExplainer(_model[-1])
     shap_values = explainer(_model[:-1].transform(prepared_data_copy))
     shap_values.feature_names = prepared_data_copy.columns
@@ -88,18 +88,6 @@ def make_prediction(df: DataFrame, explain: bool) -> None:
         selected_data = prepared_data
     explain_predictions(get_shap_values(selected_data.drop(columns=[result_column]), model),
                         len(selected_data.columns) - 1)
-    return
-
-    st.subheader('Explanation with SHAP')
-    shap_values = get_shap_values(prepared_data_copy, model)
-    st_shap(shap.plots.beeswarm(shap_values, max_display=len(prepared_data_copy.columns)))
-    st.subheader('Explain every instance')
-    instance_idx = st.number_input('Instance index', min_value=0, max_value=len(prepared_data_copy), step=1)
-    explainer = shap.TreeExplainer(model[-1])
-    instance = [list(prepared_data_copy.iloc[instance_idx])]
-    explanation = explainer(model[:-1].transform(instance))
-    explanation.feature_names = prepared_data_copy.columns
-    st_shap(shap.plots.waterfall(explanation[0], max_display=len(prepared_data_copy.columns)), width=1600)
 
 
 def show_data(file: DataFrame) -> None:
