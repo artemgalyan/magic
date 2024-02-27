@@ -1,20 +1,27 @@
 import os
 import pickle
-
 from io import StringIO
 
+import numpy as np
 import shap
 import streamlit as st
-
 from pandas import DataFrame, read_csv, Series
 from sklearn.base import BaseEstimator
+from st_aggrid import AgGrid, AgGridReturn, GridOptionsBuilder
 from streamlit_shap import st_shap
-
 
 MODEL_PATH = os.environ.get('DATA_PATH', 'models/CatBoostClassifier.pkl')
 DATA_PATH = os.environ.get('DATA_PATH', 'data/interim/data.csv')
 
 st.set_page_config(layout='wide')
+
+
+def show_dataframe(df: DataFrame, selection_mode: str | None = 'single', page_size: int = 20) -> AgGridReturn:
+    options_builder = GridOptionsBuilder.from_dataframe(df)
+    options_builder.from_dataframe(df)
+    options_builder.configure_pagination(True, paginationPageSize=page_size, paginationAutoPageSize=False)
+    options_builder.configure_selection(selection_mode=selection_mode, use_checkbox=True)
+    return AgGrid(df, gridOptions=options_builder.build())
 
 
 def set_button_pressed_value(value: bool) -> None:
@@ -45,7 +52,6 @@ def drop_if_exist(df: DataFrame, *columns: str) -> DataFrame:
     return df
 
 
-@st.cache_data
 def get_shap_values(prepared_data_copy: DataFrame, _model: BaseEstimator) -> shap.Explanation:
     explainer = shap.TreeExplainer(_model[-1])
     shap_values = explainer(_model[:-1].transform(prepared_data_copy))
@@ -53,17 +59,37 @@ def get_shap_values(prepared_data_copy: DataFrame, _model: BaseEstimator) -> sha
     return shap_values
 
 
+def explain_predictions(explanation: shap.Explanation, number_of_columns: int) -> None:
+    st.subheader('Explanation with SHAP')
+    if len(explanation) == 1:
+        plot_type = st.radio('Explanation format', options=['Beeswarm', 'Waterfall'], index=len(explanation) > 0)
+    else:
+        plot_type = 'Beeswarm'
+    if plot_type == 'Beeswarm':
+        st_shap(shap.plots.beeswarm(explanation, max_display=number_of_columns))
+    else:
+        st_shap(shap.plots.waterfall(explanation[0], max_display=number_of_columns))
+
+
 def make_prediction(df: DataFrame, explain: bool) -> None:
     real_data = load_data()
     model = load_model()
     prepared_data = drop_if_exist(df.copy()[real_data.columns], 'Attrition')
-    prepared_data_copy = prepared_data.copy()
     results = model.predict_proba(prepared_data)
-    prepared_data.insert(1, 'Attrition probability', Series(data=100*results[:, 1]))
+    result_column = 'Attrition probability (%)'
+    prepared_data.insert(1, result_column, Series(data=np.round(100 * results[:, 1], 1)))
     st.subheader('Results')
-    st.dataframe(prepared_data)
+    grid_data = show_dataframe(prepared_data, selection_mode='multiple')
     if not explain:
         return
+    if len(grid_data.selected_rows) > 0:
+        selected_data = DataFrame(grid_data.selected_rows).drop(columns=['_selectedRowNodeInfo'])
+    else:
+        selected_data = prepared_data
+    explain_predictions(get_shap_values(selected_data.drop(columns=[result_column]), model),
+                        len(selected_data.columns) - 1)
+    return
+
     st.subheader('Explanation with SHAP')
     shap_values = get_shap_values(prepared_data_copy, model)
     st_shap(shap.plots.beeswarm(shap_values, max_display=len(prepared_data_copy.columns)))
@@ -76,12 +102,13 @@ def make_prediction(df: DataFrame, explain: bool) -> None:
     st_shap(shap.plots.waterfall(explanation[0], max_display=len(prepared_data_copy.columns)), width=1600)
 
 
-def show_dataframe(file: DataFrame) -> None:
-    st.dataframe(file)
-    explain = st.checkbox('Explain results')
+def show_data(file: DataFrame) -> None:
+    selection_data = show_dataframe(file, selection_mode='multiple')
+    prediction_data = file if len(selection_data.selected_rows) == 0 else DataFrame(selection_data.selected_rows)
+    explain = st.checkbox('Explain predictions')
     if st.button('Make prediction') or is_button_pressed():
         set_button_pressed_value(True)
-        make_prediction(file, explain)
+        make_prediction(prediction_data, explain)
     else:
         set_button_pressed_value(False)
 
@@ -90,4 +117,4 @@ file = st.file_uploader('Upload your dataframe')
 if file is not None:
     content = file.read().decode()
     df = read_csv(StringIO(content))
-    show_dataframe(df)
+    show_data(df)
