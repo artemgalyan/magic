@@ -1,6 +1,5 @@
 import os
 
-from collections import defaultdict
 from enum import Enum
 
 import streamlit as st
@@ -8,7 +7,7 @@ import plotly.express as px
 
 from pandas import read_csv, DataFrame
 from plotly.graph_objects import Figure
-from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid import AgGrid, GridOptionsBuilder, DataReturnMode
 
 
 class FeatureType(Enum):
@@ -37,7 +36,7 @@ data = load_data()
 options_builder = GridOptionsBuilder.from_dataframe(data)
 options_builder.from_dataframe(data)
 options_builder.configure_pagination(True, paginationPageSize=page_size, paginationAutoPageSize=False)
-returned = AgGrid(data, gridOptions=options_builder.build())
+returned = AgGrid(data, gridOptions=options_builder.build(), data_return_mode=DataReturnMode.FILTERED)
 
 columns = list(data.columns)
 numerical_features = {col for col in data.columns if data[col].dtype != object}
