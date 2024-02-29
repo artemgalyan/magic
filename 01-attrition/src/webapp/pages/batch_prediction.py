@@ -7,7 +7,7 @@ import shap
 import streamlit as st
 from pandas import DataFrame, read_csv, Series
 from sklearn.pipeline import Pipeline
-from st_aggrid import AgGrid, AgGridReturn, GridOptionsBuilder
+from st_aggrid import AgGrid, AgGridReturn, GridOptionsBuilder, DataReturnMode
 from streamlit_shap import st_shap
 
 MODEL_PATH = os.environ.get('DATA_PATH', 'models/CatBoostClassifier.pkl')
@@ -21,7 +21,7 @@ def show_dataframe(df: DataFrame, selection_mode: str | None = 'single', page_si
     options_builder.from_dataframe(df)
     options_builder.configure_pagination(True, paginationPageSize=page_size, paginationAutoPageSize=False)
     options_builder.configure_selection(selection_mode=selection_mode, use_checkbox=True)
-    return AgGrid(df, gridOptions=options_builder.build())
+    return AgGrid(df, gridOptions=options_builder.build(), data_return_mode=DataReturnMode.FILTERED)
 
 
 def set_button_pressed_value(value: bool) -> None:
@@ -82,17 +82,14 @@ def make_prediction(df: DataFrame, explain: bool) -> None:
     grid_data = show_dataframe(prepared_data, selection_mode='multiple')
     if not explain:
         return
-    if len(grid_data.selected_rows) > 0:
-        selected_data = DataFrame(grid_data.selected_rows).drop(columns=['_selectedRowNodeInfo'])
-    else:
-        selected_data = prepared_data
+    selected_data = grid_data.data
     explain_predictions(get_shap_values(selected_data.drop(columns=[result_column]), model),
-                        len(selected_data.columns) - 1)
+                        len(real_data.columns) - 1)
 
 
 def show_data(file: DataFrame) -> None:
     selection_data = show_dataframe(file, selection_mode='multiple')
-    prediction_data = file if len(selection_data.selected_rows) == 0 else DataFrame(selection_data.selected_rows)
+    prediction_data = selection_data.data
     explain = st.checkbox('Explain predictions')
     if st.button('Make prediction') or is_button_pressed():
         set_button_pressed_value(True)

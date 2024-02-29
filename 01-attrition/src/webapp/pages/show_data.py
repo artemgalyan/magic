@@ -38,6 +38,7 @@ options_builder.from_dataframe(data)
 options_builder.configure_pagination(True, paginationPageSize=page_size, paginationAutoPageSize=False)
 returned = AgGrid(data, gridOptions=options_builder.build(), data_return_mode=DataReturnMode.FILTERED)
 
+data = returned.data
 columns = list(data.columns)
 numerical_features = {col for col in data.columns if data[col].dtype != object}
 categorical_features = set(data.columns) - numerical_features
