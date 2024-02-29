@@ -82,14 +82,20 @@ def make_prediction(df: DataFrame, explain: bool) -> None:
     grid_data = show_dataframe(prepared_data, selection_mode='multiple')
     if not explain:
         return
-    selected_data = grid_data.data
+    selected_data = grid_data.data \
+        if len(grid_data.selected_rows) == 0 \
+        else DataFrame(grid_data.selected_rows).drop(columns=['_selectedRowNodeInfo'])
+    selected_data.fillna(value=np.nan, inplace=True)
     explain_predictions(get_shap_values(selected_data.drop(columns=[result_column]), model),
                         len(real_data.columns) - 1)
 
 
 def show_data(file: DataFrame) -> None:
     selection_data = show_dataframe(file, selection_mode='multiple')
-    prediction_data = selection_data.data
+    print(selection_data.selected_rows)
+    prediction_data = selection_data.data \
+        if len(selection_data.selected_rows) == 0 \
+        else DataFrame(selection_data.selected_rows).drop(columns=['_selectedRowNodeInfo'])
     explain = st.checkbox('Explain predictions')
     if st.button('Make prediction') or is_button_pressed():
         set_button_pressed_value(True)
