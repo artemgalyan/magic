@@ -87,3 +87,17 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+
+# model files
+*.pkl
+
+# catboost
+/notebooks/catboost_info
+
+# html
+*.html
+*.htm
+
+# vscode
+.vscode

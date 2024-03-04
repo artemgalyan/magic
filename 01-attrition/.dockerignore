@@ -1,0 +1,10 @@
+# .hidden dirs
+**/.?
+
+
+# not needed files
+**/*.html
+notebooks/catboost_info/*
+.env
+LICENSE
+README.md
