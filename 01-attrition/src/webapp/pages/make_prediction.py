@@ -13,7 +13,7 @@ from sklearn.base import BaseEstimator
 from streamlit_shap import st_shap
 
 DATA_PATH = os.environ.get('DATA_PATH', 'data/interim/data.csv')
-MODEL_PATH = os.environ.get('DATA_PATH', 'models/CatBoostClassifier.pkl')
+MODEL_PATH = os.environ.get('MODEL_PATH', 'models/CatBoostClassifier.pkl')
 
 st.set_page_config(layout='wide')
 

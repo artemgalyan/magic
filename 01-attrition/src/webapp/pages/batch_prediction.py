@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 from st_aggrid import AgGrid, AgGridReturn, GridOptionsBuilder, DataReturnMode
 from streamlit_shap import st_shap
 
-MODEL_PATH = os.environ.get('DATA_PATH', 'models/CatBoostClassifier.pkl')
+MODEL_PATH = os.environ.get('MODEL_PATH', 'models/CatBoostClassifier.pkl')
 DATA_PATH = os.environ.get('DATA_PATH', 'data/interim/data.csv')
 
 st.set_page_config(layout='wide')
@@ -92,7 +92,6 @@ def make_prediction(df: DataFrame, explain: bool) -> None:
 
 def show_data(file: DataFrame) -> None:
     selection_data = show_dataframe(file, selection_mode='multiple')
-    print(selection_data.selected_rows)
     prediction_data = selection_data.data \
         if len(selection_data.selected_rows) == 0 \
         else DataFrame(selection_data.selected_rows).drop(columns=['_selectedRowNodeInfo'])

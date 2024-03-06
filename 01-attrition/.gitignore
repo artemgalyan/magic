@@ -100,4 +100,5 @@ target/
 *.htm
 
 # vscode
-.vscode
+.vscode/
+    
