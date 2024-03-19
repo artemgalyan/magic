@@ -20,6 +20,3 @@ ENV PYTHONPATH="$PYTHONPATH:/app/dependencies"
 
 EXPOSE 8501
 ENTRYPOINT ["python", "-m", "streamlit", "run", "/app/app.py", "--global.developmentMode", "false", "--server.port", "8501"]
-
-
-# this is a multistage version
