@@ -2,7 +2,7 @@
 name = 'src'
 version = '0.1.0'
 authors = [
-    {name = 'Artsiom Halian', email = 'galyanartyom@gmail.com'}
+    {name = 'Artsiom Halian', email = 'galyan.artyom@gmail.com'}
 ]
 description = 'Repository for learning DS'
 requires-python = '>=3.11.7'
