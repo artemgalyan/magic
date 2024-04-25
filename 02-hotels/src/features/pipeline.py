@@ -94,7 +94,7 @@ class DropColumns(PipelineProcessor):
 
     def fit_transform(self, x: pl.DataFrame, state: PipelineState) -> tuple[DataFrame, PipelineState]:
         state.schema = {k: v for k, v in state.schema.items() if k not in self.columns}
-        return x, state
+        return self.transform(x), state
     
     def transform(self, x: pl.DataFrame) -> pl.DataFrame:
         return x.drop(*self.columns)
